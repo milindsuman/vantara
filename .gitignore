@@ -1,0 +1,10 @@
+# Raw/intermediate data not needed for deployment
+data/merged_raw.csv
+
+# Python
+__pycache__/
+*.pyc
+
+# OS/editor junk
+.DS_Store
+.vscode/
