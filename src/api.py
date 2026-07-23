@@ -2,7 +2,7 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 import pandas as pd
 
-
+from fastapi.responses import RedirectResponse
 from src import forecasting
 from src import recommendation
 import requests
@@ -71,7 +71,7 @@ def load_models():
 
 @app.get("/")
 def root():
-    return {"status": "Vantara API is running"}
+    return RedirectResponse(url="/docs")
 
 
 @app.get("/segment/{customer_id}")
