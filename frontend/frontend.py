@@ -1,7 +1,7 @@
 import streamlit as st
 import requests
 
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://vantara-api-sw3a.onrender.com"
 
 st.set_page_config(page_title="Vantara", layout="centered")
 st.title("Vantara")

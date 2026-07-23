@@ -150,9 +150,25 @@ def run_forecasting_pipeline(input_path: str) -> tuple:
     return model, monthly
 
 
-if __name__ == '__main__':
-    result = run_forecasting(
-        input_path=DATA_DIR / 'forecasting_ready.csv',
-        output_path=DATA_DIR / 'monthly_demand_features.csv'
-    )
-    print(result)
+if __name__ == "__main__":
+    print("========== START ==========")
+
+    try:
+        print("Running evaluation...")
+        result = run_forecasting(
+            input_path=DATA_DIR / "forecasting_ready.csv",
+            output_path=DATA_DIR / "monthly_demand_features.csv"
+        )
+        print(result)
+
+        print("About to call pipeline...")
+        model, monthly = run_forecasting_pipeline(
+            DATA_DIR / "forecasting_ready.csv"
+        )
+        print("Pipeline returned successfully.")
+
+    except Exception as e:
+        print("ERROR:", repr(e))
+        raise
+
+    print("Forecast model saved successfully!")

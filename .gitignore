@@ -8,3 +8,4 @@ __pycache__/
 # OS/editor junk
 .DS_Store
 .vscode/
+echo "data/similarity_matrix.pkl" >> .gitignore
