@@ -8,9 +8,9 @@ from src import recommendation
 import requests
 
 DATA_URLS = {
-    "recommendation_ready.csv": "https://github.com/you/vantara/releases/download/v1/recommendation_ready.csv",
-    "segmentation_ready.csv": "https://github.com/you/vantara/releases/download/v1/segmentation_ready.csv",
-    "forecasting_ready.csv": "https://github.com/you/vantara/releases/download/v1/forecasting_ready.csv",
+    "recommendation_ready.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/recommendation_ready.csv",
+    "segmentation_ready.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/segmentation_ready.csv",
+    "forecasting_ready.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/forecasting_ready.csv",
 }
 
 def ensure_data_file(path: Path, url: str):
