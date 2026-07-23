@@ -2,15 +2,23 @@ from pathlib import Path
 from fastapi import FastAPI, HTTPException
 import pandas as pd
 
-from src import segmentation
+
 from src import forecasting
 from src import recommendation
 import requests
 
 DATA_URLS = {
-    "recommendation_ready.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/recommendation_ready.csv",
-    "segmentation_ready.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/segmentation_ready.csv",
-    "forecasting_ready.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/forecasting_ready.csv",
+    "als_model.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/als_model.pkl",
+    "customer_lookup.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/customer_lookup.pkl",
+    "customer_segments.csv": "https://github.com/milindsuman/vantara/releases/download/v1.0/customer_segments.csv",
+    "forecast_model.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/forecast_model.pkl",
+    "interaction_matrix.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/interaction_matrix.pkl",
+    "monthly_demand.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/monthly_demand.pkl",
+    "product_index_lookup.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/product_index_lookup.pkl",
+    "product_lookup.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/product_lookup.pkl",
+    "products.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/products.pkl",
+    "scaler.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/scaler.pkl",
+    "similarity_matrix.pkl": "https://github.com/milindsuman/vantara/releases/download/v1.0/similarity_matrix.pkl",
 }
 
 def ensure_data_file(path: Path, url: str):
@@ -30,35 +38,35 @@ state = {}
 
 @app.on_event("startup")
 def load_models():
+
     for filename, url in DATA_URLS.items():
         ensure_data_file(DATA_DIR / filename, url)
-    seg_result = segmentation.run_segmentation(
-        input_path=DATA_DIR / 'segmentation_ready.csv',
-        output_path=DATA_DIR / 'customer_segments.csv',
-        k=5
+
+    import joblib
+
+    state["segments"] = pd.read_csv(DATA_DIR / "customer_segments.csv")
+
+    state["als_model"] = joblib.load(DATA_DIR / "als_model.pkl")
+    state["matrix"] = joblib.load(DATA_DIR / "interaction_matrix.pkl")
+    state["customer_lookup"] = joblib.load(DATA_DIR / "customer_lookup.pkl")
+    state["product_lookup"] = joblib.load(DATA_DIR / "product_lookup.pkl")
+
+    state["customer_id_to_idx"] = {
+        v: k for k, v in state["customer_lookup"].items()
+    }
+
+    state["similarity"] = joblib.load(DATA_DIR / "similarity_matrix.pkl")
+    state["product_index_lookup"] = joblib.load(DATA_DIR / "product_index_lookup.pkl")
+    state["products"] = pd.read_pickle(DATA_DIR / "products.pkl")
+
+    state["description_lookup"] = recommendation.build_description_lookup(
+        state["products"]
     )
-    state['segments'] = pd.read_csv(DATA_DIR / 'customer_segments.csv')
 
-    summary, als_model, matrix, customer_lookup, product_lookup, similarity, product_index_lookup, products = \
-        recommendation.run_recommendation_pipeline(DATA_DIR / 'recommendation_ready.csv')
+    state["forecast_model"] = joblib.load(DATA_DIR / "forecast_model.pkl")
+    state["monthly_demand"] = pd.read_pickle(DATA_DIR / "monthly_demand.pkl")
 
-    state['als_model'] = als_model
-    state['matrix'] = matrix
-    state['customer_lookup'] = customer_lookup
-    state['product_lookup'] = product_lookup
-    state['customer_id_to_idx'] = {v: k for k, v in customer_lookup.items()}
-    state['similarity'] = similarity
-    state['product_index_lookup'] = product_index_lookup
-    state['products'] = products
-    state['description_lookup'] = recommendation.build_description_lookup(products)
-
-    forecast_model, monthly_demand = forecasting.run_forecasting_pipeline(
-        DATA_DIR / 'forecasting_ready.csv'
-    )
-    state['forecast_model'] = forecast_model
-    state['monthly_demand'] = monthly_demand
-
-    print("All models loaded and ready.")
+    print("All pretrained models loaded.")
 
 
 @app.get("/")
