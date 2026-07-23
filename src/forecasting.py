@@ -1,8 +1,13 @@
+from pathlib import Path
+import joblib
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import lightgbm as lgb
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / 'data'
 
 
 def load_forecasting_data(path: str) -> pd.DataFrame:
@@ -138,13 +143,12 @@ def run_forecasting_pipeline(input_path: str) -> tuple:
     monthly = build_monthly_demand(df)
     monthly = engineer_features(monthly)
     model = train_final_model(monthly)
+
+    joblib.dump(model, DATA_DIR / 'forecast_model.pkl')
+    monthly.to_pickle(DATA_DIR / 'monthly_demand.pkl')
+
     return model, monthly
 
-
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / 'data'
 
 if __name__ == '__main__':
     result = run_forecasting(

@@ -1,9 +1,14 @@
+from pathlib import Path
+import joblib
 import pandas as pd
 import numpy as np
 from scipy.sparse import csr_matrix
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 import implicit
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / 'data'
 
 
 def load_recommendation_data(path: str) -> pd.DataFrame:
@@ -83,6 +88,14 @@ def run_recommendation_pipeline(input_path: str):
 
     similarity, product_index_lookup, products = build_content_similarity(df)
 
+    joblib.dump(als_model, DATA_DIR / 'als_model.pkl')
+    joblib.dump(matrix, DATA_DIR / 'interaction_matrix.pkl')
+    joblib.dump(customer_lookup, DATA_DIR / 'customer_lookup.pkl')
+    joblib.dump(product_lookup, DATA_DIR / 'product_lookup.pkl')
+    joblib.dump(similarity, DATA_DIR / 'similarity_matrix.pkl')
+    joblib.dump(product_index_lookup, DATA_DIR / 'product_index_lookup.pkl')
+    products.to_pickle(DATA_DIR / 'products.pkl')
+
     summary = {
         'n_customers': matrix.shape[0],
         'n_products': matrix.shape[1],
@@ -90,11 +103,6 @@ def run_recommendation_pipeline(input_path: str):
     }
     return summary, als_model, matrix, customer_lookup, product_lookup, similarity, product_index_lookup, products
 
-
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / 'data'
 
 if __name__ == '__main__':
     summary, *_ = run_recommendation_pipeline(DATA_DIR / 'recommendation_ready.csv')

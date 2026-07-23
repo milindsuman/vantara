@@ -1,7 +1,12 @@
+from pathlib import Path
+import joblib
 import pandas as pd
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.metrics import silhouette_score
+
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / 'data'
 
 
 def compute_rfm(df: pd.DataFrame, reference_date: pd.Timestamp = None) -> pd.DataFrame:
@@ -65,6 +70,9 @@ def run_segmentation(input_path: str, output_path: str, k: int = 5) -> dict:
 
     rfm.to_csv(output_path, index=False)
 
+    joblib.dump(km, DATA_DIR / 'kmeans_model.pkl')
+    joblib.dump(scaler, DATA_DIR / 'scaler.pkl')
+
     summary = {
         'n_customers': len(rfm),
         'k': k,
@@ -73,13 +81,6 @@ def run_segmentation(input_path: str, output_path: str, k: int = 5) -> dict:
     }
     return summary
 
-
-from pathlib import Path
-
-BASE_DIR = Path(__file__).resolve().parent.parent
-DATA_DIR = BASE_DIR / 'data'
-
-# ... (all existing functions stay unchanged) ...
 
 if __name__ == '__main__':
     result = run_segmentation(
